@@ -1,0 +1,10 @@
+(sdsd)    (sdsdf sddsf)
+
+To replace a key (property) in a JavaScript object, you should follow these steps:
+
+Create a new property with the desired key and copy the value of the old key to this new property.
+
+Delete the old key (if necessary).
+Here is an example of how this can be done:
+
+Я русский (да) ав.
