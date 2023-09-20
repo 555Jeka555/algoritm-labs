@@ -1,100 +1,242 @@
 /*
- * РђРІС‚РѕСЂ: РђРЅС‚С‹С€РµРІ Р•РІРіРµРЅРёР№
- * Р“СЂСѓРїРїР°: РџРЎ-21
+ * Автор: Антышев Евгений
+ * Группа: ПС-21
  *
- * РЈСЃР»РѕРІРёРµ Р·Р°РґР°С‡Рё в„–16:
- * РЈ РјРЅРѕР¶РµСЃС‚РІР° С€РїРёРѕРЅРѕРІ,  СЃРѕР±СЂР°РІС€РёС…СЃСЏ РІРјРµСЃС‚Рµ РґР»СЏ РЅР°Р±Р»СЋРґРµРЅРёСЏ
- * СЃРµРєСЂРµС‚РЅРѕРіРѕ     РѕР±СЉРµРєС‚Р°,    РёРјРµРµС‚СЃСЏ    РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№    Р±РёРЅРѕРєР»СЊ.
- * РЎС„РѕСЂРјРёСЂРѕРІР°Р»Р°СЃСЊ РѕС‡РµСЂРµРґСЊ РЅР° СЌС‚РѕС‚  Р±РёРЅРѕРєР»СЊ.  Р”Р»СЏ  РєР°Р¶РґРѕРіРѕ  С€РїРёРѕРЅР°
- * Р·Р°РґР°РЅ   РїРµСЂРёРѕРґ   РЅР°Р±Р»СЋРґРµРЅРёСЏ   РІ  РјРёРЅСѓС‚Р°С…  Рё  РїСЂРµРґРµР»СЊРЅРѕРµ  РІСЂРµРјСЏ
- * РЅР°С…РѕР¶РґРµРЅРёСЏ РІ РѕС‡РµСЂРµРґРё. РџРѕСЃР»Рµ РЅР°Р±Р»СЋРґРµРЅРёСЏ РєР°Р¶РґС‹Р№ С€РїРёРѕРЅ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ
- * СЃРЅРѕРІР°  РІ  РєРѕРЅРµС†  РѕС‡РµСЂРµРґРё.  РљР°Рє  С‚РѕР»СЊРєРѕ  РґР»СЏ РєР°РєРѕРіРѕ-Р»РёР±Рѕ С€РїРёРѕРЅР°
- * РёСЃС‚РµРєР°РµС‚ РїСЂРµРґРµР»СЊРЅРѕРµ РІСЂРµРјСЏ РЅР°С…РѕР¶РґРµРЅРёСЏ РІ РѕС‡РµСЂРµРґРё, РѕРЅ РїРѕРєРёРґР°РµС‚ РµРµ
- * (РґР°Р¶Рµ  РµСЃР»Рё  РІ  СЌС‚РѕС‚ РјРѕРјРµРЅС‚ РІР»Р°РґРµРµС‚ Р±РёРЅРѕРєР»РµРј) Рё РѕС‚РїСЂР°РІР»СЏРµС‚СЃСЏ Рє
- * СЂРµР·РёРґРµРЅС‚Сѓ. Р’С‹РІРµСЃС‚Рё РїСЂРѕС‚РѕРєРѕР» РЅР°Р±Р»СЋРґРµРЅРёСЏ С€РїРёРѕРЅРѕРІ Р·Р° РѕР±СЉРµРєС‚РѕРј(9)
+ * Условие задачи №16:
+ * У множества шпионов,  собравшихся вместе для наблюдения
+ * секретного     объекта,    имеется    единственный    бинокль.
+ * Сформировалась очередь на этот  бинокль.  Для  каждого  шпиона
+ * задан   период   наблюдения   в  минутах  и  предельное  время
+ * нахождения в очереди. После наблюдения каждый шпион становится
+ * снова  в  конец  очереди.  Как  только  для какого-либо шпиона
+ * истекает предельное время нахождения в очереди, он покидает ее
+ * (даже  если  в  этот момент владеет биноклем) и отправляется к
+ * резиденту. Вывести протокол наблюдения шпионов за объектом(9)
  *
- * РСЃРїРѕР»СЊР·СѓРµРјС‹Рµ СЂРµСЃСѓСЂСЃС‹:
+ * Используемые ресурсы:
  * 1. https://metanit.com/cpp/tutorial
  *
- * РЎСЂРµРґР° СЂР°Р·СЂР°Р±РѕС‚РєРё:  CLion 2023.2.1
- * Р’РµСЂСЃРёСЏ C++: C++17
+ * Среда разработки:  CLion 2023.2.1
+ * Версия C++: C++17
  *
  */
 
 #include <iostream>
-#include <queue>
 #include <windows.h>
 #include <fstream>
-#include <codecvt>
-#include <io.h>
-#include <fcntl.h>
 
 struct Spy {
     int id;
-    int timeObserv; // РїРµСЂРёРѕРґ РЅР°Р±Р»СЋРґРµРЅРёСЏ РІ РјРёРЅСѓС‚Р°С…
-    int timeLeft; // РїСЂРµРґРµР»СЊРЅРѕРµ РІСЂРµРјСЏ РЅР°С…РѕР¶РґРµРЅРёСЏ РІ РѕС‡РµСЂРµРґРё РІ РјРёРЅСѓС‚Р°С…
-    int timeInQueue; // РІСЂРµРјСЏ, РїСЂРѕРІРµРґРµРЅРЅРѕРµ РІ РѕС‡РµСЂРµРґРё РІ РјРёРЅСѓС‚Р°С…
+    std::string name;
+    int timeObserv = 0; // период наблюдения в минутах
+    int timeLeft = 0; // предельное время нахождения в очереди в минутах
+    int timeInQueue = 0; // время, проведенное в очереди в минутах
+};
+
+int parseNum(char ch) {
+    switch(ch) {
+        case '0':
+            return 0;
+        case '1':
+            return 1;
+        case '2':
+            return 2;
+        case '3':
+            return 3;
+        case '4':
+            return 4;
+        case '5':
+            return 5;
+        case '6':
+            return 6;
+        case '7':
+            return 7;
+        case '8':
+            return 8;
+        case '9':
+            return 9;
+        default:
+            return -1;
+    }
+}
+
+int parseInt(const std::string& word, int base=10) {
+    int result = 0;
+    for (char ch : word) {
+        if (parseNum(ch) == -1) {
+            return parseNum(ch);
+        }
+        result = result * base + parseNum(ch);
+    }
+    return result;
+}
+
+struct Node {
+    Spy spy;
+    Node *next = nullptr;
+};
+
+struct Queue {
+    Node* _head = nullptr;
+    Node* _back = nullptr;
+    int _deep = 0;
+    void push(Spy spy) {
+        auto* newNode = new Node;
+        this->_refresh();
+        if (_head == nullptr) {
+            newNode->spy = spy;
+            newNode->next = _back;
+            _head = newNode;
+        } else if (_back == nullptr) {
+            newNode->spy = spy;
+            newNode->next = nullptr;
+            _back = newNode;
+            _head->next = _back;
+        } else {
+            newNode->spy = spy;
+            newNode->next = nullptr;
+            _back->next = newNode;
+            _back = newNode;
+        }
+        this->_deep++;
+    };
+    Spy pop() {
+        Spy spy = _head->spy;
+        _head = _head->next;
+        this->_deep--;
+        return spy;
+    }
+    bool isEmpty() {
+        return _head == nullptr || this->_deep == 0;
+    }
+    int getDeep() {
+       return this->_deep;
+    }
+    void _refresh() {
+        if (this->_deep == 0) {
+            this->_head = nullptr;
+            this->_back = nullptr;
+        } else if (this->_deep == 1) {
+            this->_back = nullptr;
+            this->_head->next = _back;
+        }
+    }
 };
 
 
+void decreaseTimeLeft(std::basic_ofstream<char> &fileOutput, Queue *queue, int timeDecrease) {
+    Spy spy;
+
+    int deep = queue->getDeep();
+    while (deep > 0) {
+        spy = queue->pop();
+        spy.timeLeft -= timeDecrease;
+        if (spy.timeLeft <= 0) {
+            fileOutput << "Шпион-" << spy.name << " вышел из очереди. Наблюдал всего: " << spy.timeInQueue
+                       << " мин." << std::endl;
+        } else {
+            queue->push(spy);
+        }
+        deep--;
+    }
+}
+
 int main() {
-    _setmode(_fileno(stdout), _O_U8TEXT);
-    _setmode(_fileno(stdin), _O_U8TEXT);
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
 
-    std::locale utf8_locale(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
-    std::locale::global(utf8_locale);
+    const char SPACE = ' ';
+    const char NEWLINE = '\n';
 
-    std::wofstream fileOutputClear(L"output.txt", std::ios::trunc);
+    std::string fileNameInput;
+    std::cout << "Enter name INPUT file: " << std::endl;
+    std::cin >> fileNameInput;
+    std::ifstream fileInput(fileNameInput);
+
+    if (!fileInput.is_open()) {
+        std::cerr << "Error to open INPUT file." << std::endl;
+        return 1;
+    }
+
+    int id;
+    char ch;
+    std::string word;
+    Spy spy = *new Spy;
+    auto* queue = new Queue;
+
+    while (fileInput.get(ch)) {
+        if (ch == NEWLINE || ch == SPACE) {
+            if (parseInt(word) != -1) {
+                spy.timeObserv = parseInt(word);
+            } else {
+                if (spy.name == "") {
+                    spy.name += word;
+                } else {
+                    spy.name += " " + word;
+                }
+            }
+
+            if (ch == NEWLINE) {
+                spy.id = id;
+                id++;
+                if (spy.timeObserv > 0 && spy.timeLeft > 0) {
+                    queue->push(spy);
+                }
+                spy = *new Spy;
+            }
+
+            if (ch == SPACE && parseInt(word) != -1) {
+                spy.timeLeft = parseInt(word);
+            }
+            word = "";
+        } else {
+            word += ch;
+        }
+    }
+
+    if (word != "") {
+        if (parseInt(word) != -1) {
+            spy.timeLeft = parseInt(word);
+            spy.id = id;
+            queue->push(spy);
+        }
+    }
+
+    std::ofstream fileOutputClear("output.txt", std::ios::trunc);
     if (!fileOutputClear.is_open()) {
-        std::cerr << L"РћС€РёР±РєР° РїСЂРё РѕС‚РєСЂС‹С‚РёРёРё С„Р°Р№Р»Р° OUTPUT." << std::endl;
+        std::cerr << "Ошибка при открытиии файла OUTPUT." << std::endl;
         return 1;
     }
     fileOutputClear.close();
 
-    std::wofstream fileOutput(L"output.txt", std::ios::app);
+    std::ofstream fileOutput("output.txt", std::ios::app);
     if (!fileOutput.is_open()) {
-        std::cerr << L"РћС€РёР±РєР° РїСЂРё РѕС‚РєСЂС‹С‚РёРёРё С„Р°Р№Р»Р° OUTPUT." << std::endl;
+        std::cerr << "Ошибка при открытиии файла OUTPUT." << std::endl;
         return 1;
     }
 
-    int n;
-    std::wcout << L"Р’РІРµРґРёС‚Рµ РїСЂРѕРёР·РѕРІР»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ С€РїРёРѕРЅРѕРІ РІ РјРЅРѕР¶РµСЃС‚РІРµ: ";
-    std::wcin >> n;
-
-    std::queue<Spy> spyQueue;
-    std::vector<Spy> spies(n);
-
-    for (int i = 0; i < n; i++) {
-        int id = i + 1;
-        spies[i].id = id;
-        std::wcout << L"Р’РІРµРґРёС‚Рµ РІСЂРµРјСЏ РЅР°Р±Р»СЋРґРµРЅРёСЏ С€РїРёРѕРЅР° в„–" << id << L": ";
-        std::wcin >> spies[i].timeObserv;
-        std::wcout << L"Р’РІРµРґРёС‚Рµ РІСЂРµРјСЏ РЅР°С…РѕР¶РґРµРЅРёСЏ РІ РѕС‡РµСЂРµРґРё С€РїРёРѕРЅР° в„–" << id << L": ";
-        std::wcin >> spies[i].timeLeft;
-        spies[i].timeInQueue = 0;
-        spyQueue.push(spies[i]);
-    }
-
     int timeElapsed = 0;
+    while (!queue->isEmpty()) {
+        Spy currentSpy = queue->pop();
 
-    while (!spyQueue.empty()) {
-        Spy currentSpy = spyQueue.front();
-        spyQueue.pop();
+        int timeToWatch = (currentSpy.timeLeft > currentSpy.timeObserv) ? currentSpy.timeObserv : currentSpy.timeLeft;
 
-        currentSpy.timeLeft -= timeElapsed;
+        currentSpy.timeLeft -= timeToWatch;
+        currentSpy.timeInQueue += timeToWatch;
+
+        fileOutput << "Шпион-" << currentSpy.name << " наблюдал за объектом " << timeToWatch << " мин." << std::endl;
+
+        decreaseTimeLeft(fileOutput, queue, timeToWatch);
 
         if (currentSpy.timeLeft <= 0) {
-            fileOutput << L"РЁРїРёРѕРЅ-" << currentSpy.id << L" РІС‹С€РµР» РёР· РѕС‡РµСЂРµРґРё. РќР°Р±Р»СЋРґР°Р» РІСЃРµРіРѕ: " << currentSpy.timeInQueue << L" РјРёРЅ." << std::endl;
+            fileOutput << "Шпион-" << currentSpy.name << " вышел из очереди. Наблюдал всего: " << currentSpy.timeInQueue
+                       << " мин." << std::endl;
         } else {
-            currentSpy.timeLeft -= currentSpy.timeObserv;
-            int timeToWatch = currentSpy.timeLeft > 0 ? currentSpy.timeObserv : currentSpy.timeLeft + currentSpy.timeObserv;
-            currentSpy.timeInQueue += timeToWatch;
-
-            fileOutput << L"РЁРїРёРѕРЅ-" << currentSpy.id << L" РЅР°Р±Р»СЋРґР°Р» Р·Р° РѕР±СЉРµРєС‚РѕРј " << timeToWatch << L" РјРёРЅ." << std::endl;
-            spyQueue.push(currentSpy);
-
-            timeElapsed += timeToWatch;
+            queue->push(currentSpy);
         }
+
+        timeElapsed += timeToWatch;
+        fileOutput << "Всего прошло времени: " << timeElapsed << " мин." << std::endl;
     }
 
     fileOutput.close();
