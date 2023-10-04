@@ -1,0 +1,24 @@
+# ninja log v5
+5	632	7181287374962679	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+11	398	7175352111814526	CMakeFiles/BinTreeMath.dir/libs/MathsFunctions.cpp.obj	db458be88c799071
+633	814	7181287376705669	BinTreeMath.exe	7dbb8171876f724c
+13	699	7181290930572412	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+700	889	7181290932410185	BinTreeMath.exe	7dbb8171876f724c
+5	603	7181291314569961	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+604	786	7181291316338632	BinTreeMath.exe	7dbb8171876f724c
+7	624	7181291439896995	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+625	802	7181291441596090	BinTreeMath.exe	7dbb8171876f724c
+5	613	7181294038482914	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+614	813	7181294040412929	BinTreeMath.exe	7dbb8171876f724c
+6	725	7181307464275525	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+727	928	7181307466255856	BinTreeMath.exe	7dbb8171876f724c
+6	613	7181307597362391	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+614	794	7181307599112774	BinTreeMath.exe	7dbb8171876f724c
+5	609	7181307826549899	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+610	803	7181307828409985	BinTreeMath.exe	7dbb8171876f724c
+5	616	7181308155444161	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+617	799	7181308157195596	BinTreeMath.exe	7dbb8171876f724c
+5	624	7181308330341049	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+625	808	7181308332121030	BinTreeMath.exe	7dbb8171876f724c
+7	664	7181308448527022	CMakeFiles/BinTreeMath.dir/main.cpp.obj	34b6fa16e6dd0e0c
+665	849	7181308450337413	BinTreeMath.exe	7dbb8171876f724c
