@@ -124,15 +124,16 @@ struct Queue {
 };
 
 
-void decreaseTimeLeft(std::basic_ofstream<char> &fileOutput, Queue *queue, int timeDecrease) {
+void decreaseTimeLeft(std::basic_ofstream<char> &fileOutput, Queue *queue, int timeDecrease, int timeElasped) {
     Spy spy;
-
     int deep = queue->getDeep();
     while (deep > 0) {
         spy = queue->pop();
         spy.timeLeft -= timeDecrease;
         if (spy.timeLeft <= 0) {
-            fileOutput << "Шпион-" << spy.name << " вышел из очереди. Наблюдал всего: " << spy.timeInQueue
+           /* fileOutput << "Шпион-" << spy.name << " вышел из очереди. Наблюдал всего: " << spy.timeInQueue
+                       << " мин." << std::endl;*/
+            fileOutput << "Шпион-" << spy.name << " вышел из очереди в " << timeElasped + timeDecrease + spy.timeLeft
                        << " мин." << std::endl;
         } else {
             queue->push(spy);
@@ -216,20 +217,33 @@ int main() {
     }
 
     int timeElapsed = 0;
-    while (!queue->isEmpty()) {
+    while (!queue->isEmpty())
+    {
         Spy currentSpy = queue->pop();
+
+        if (queue->isEmpty()) {
+            fileOutput << "Шпион-" << currentSpy.name << " взашёл на пост в " << timeElapsed << " мин." << std::endl;
+            timeElapsed += currentSpy.timeLeft;
+            fileOutput << "Шпион-" << currentSpy.name << " вышел из очереди в " << timeElapsed
+                       << " мин." << std::endl;
+            fileOutput << "Всего прошло времени: " << timeElapsed << " мин." << std::endl;
+            break;
+        }
 
         int timeToWatch = (currentSpy.timeLeft > currentSpy.timeObserv) ? currentSpy.timeObserv : currentSpy.timeLeft;
 
         currentSpy.timeLeft -= timeToWatch;
         currentSpy.timeInQueue += timeToWatch;
 
-        fileOutput << "Шпион-" << currentSpy.name << " наблюдал за объектом " << timeToWatch << " мин." << std::endl;
+//        fileOutput << "Шпион-" << currentSpy.name << " наблюдал за объектом " << timeToWatch << " мин." << std::endl;
+        fileOutput << "Шпион-" << currentSpy.name << " взашёл на пост в " << timeElapsed << " мин." << std::endl;
 
-        decreaseTimeLeft(fileOutput, queue, timeToWatch);
+        decreaseTimeLeft(fileOutput, queue, timeToWatch, timeElapsed);
 
         if (currentSpy.timeLeft <= 0) {
-            fileOutput << "Шпион-" << currentSpy.name << " вышел из очереди. Наблюдал всего: " << currentSpy.timeInQueue
+            /*fileOutput << "Шпион-" << currentSpy.name << " вышел из очереди. Наблюдал всего: " << currentSpy.timeInQueue
+                       << " мин." << std::endl;*/
+            fileOutput << "Шпион-" << currentSpy.name << " вышел из очереди в " << timeElapsed + timeToWatch
                        << " мин." << std::endl;
         } else {
             queue->push(currentSpy);
