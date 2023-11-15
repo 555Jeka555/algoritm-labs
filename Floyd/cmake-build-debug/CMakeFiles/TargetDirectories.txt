@@ -1,0 +1,3 @@
+C:/Volgatech/2course/Algoritms/algoritm-labs/Floyd/cmake-build-debug/CMakeFiles/Floyd.dir
+C:/Volgatech/2course/Algoritms/algoritm-labs/Floyd/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Volgatech/2course/Algoritms/algoritm-labs/Floyd/cmake-build-debug/CMakeFiles/rebuild_cache.dir
