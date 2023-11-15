@@ -122,6 +122,55 @@ void writeMatrixA(std::vector<std::vector<int>> matrixA, std::ofstream& fileOutp
     fileOutput << std::endl;
 }
 
+void initMatrixA(std::vector<std::vector<int>>& matrixA) {
+    for (int i = 0; i < matrixA.size(); i++) {
+        for (int j = 0; j < matrixA.size(); j++) {
+            if (i == j) {
+                matrixA[i][j] = 0;
+            }
+        }
+    }
+}
+
+void initMatrixB(std::vector<std::vector<int>>& matrixB) {
+    for (int i = 0; i < matrixB.size(); i++) {
+        for (int j = 0; j < matrixB.size(); j++) {
+            if (i == j) {
+                matrixB[i][j] = i;
+            }
+        }
+    }
+}
+
+void writeMatrixAB(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB, std::ofstream& fileOutput) {
+    size_t generalSize;
+    if (matrixA.size() != matrixB.size()) {
+        std::cerr << "Error in matrix";
+    }
+    generalSize = matrixA.size();
+    for (int i = 0; i < generalSize; i++) {
+        for (int j = 0; j < generalSize; j++) {
+            if (matrixA[i][j] == INT_MAX) {
+                fileOutput << "inf" << ' ';
+                std::cout << "inf" << ' ';
+            } else {
+                fileOutput << matrixA[i][j] << ' ';
+                std::cout << matrixA[i][j] << ' ';
+            }
+        }
+        fileOutput << "     ";
+        std::cout << "     ";
+        for (int j = 0; j < generalSize; j++) {
+            fileOutput << matrixB[i][j] << ' ';
+            std::cout << matrixB[i][j] << ' ';
+        }
+        std::cout << std::endl;
+        fileOutput << std::endl;
+    }
+    std::cout << std::endl;
+    fileOutput << std::endl;
+}
+
 int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
@@ -159,42 +208,74 @@ int main() {
 
     edgesFill(vertexes, edges, fileInputEdges);
     fileInputVertex.close();
-    std::vector<std::vector<int>> matrixA(vertexes.size(), std::vector<int>(vertexes.size(), INT_MAX));
 
-    std::ofstream fileOutputClear("output.txt", std::ios::trunc);
-    if (!fileOutputClear.is_open()) {
-        std::cerr << "Error to open first OUTPUT file." << std::endl;
-        return 1;
-    }
-    fileOutputClear.close();
+    while (true) {
+        Vertex vertexStart = *new Vertex;
+        std::string startInput;
+        std::cout << "Введите номер вершин старта" << std::endl;
+        std::cin >> startInput;
+        if (!isExistVertexByName(vertexes, startInput)) {
+            continue;
+        }
+        vertexStart = findVertexByName(vertexes, startInput);
 
-    std::ofstream fileOutput("output.txt", std::ios::app);
-    if (!fileOutput.is_open()) {
-        std::cerr << "Error to open first OUTPUT file." << std::endl;
-        return 1;
-    }
+        Vertex vertexFinish = *new Vertex;
+        std::string finishInput;
+        std::cout << "Введите номер вершин финиша" << std::endl;
+        std::cin >> finishInput;
+        if (!isExistVertexByName(vertexes, finishInput)) {
+            continue;
+        }
+        vertexFinish = findVertexByName(vertexes, finishInput);
 
-    for (Edge edge : edges) {
-        matrixA[edge.idVertexInto][edge.idVertexIn] = edge.length;
-    }
+        std::vector<std::vector<int>> matrixA(vertexes.size(), std::vector<int>(vertexes.size(), INT_MAX));
+        initMatrixA(matrixA);
+        std::vector<std::vector<int>> matrixB(vertexes.size(), std::vector<int>(vertexes.size(), 0));
+        initMatrixB(matrixB);
 
-    writeMatrixA(matrixA, fileOutput);
-    std::cout << std::endl;
+        std::ofstream fileOutputClear("output.txt", std::ios::trunc);
+        if (!fileOutputClear.is_open()) {
+            std::cerr << "Error to open first OUTPUT file." << std::endl;
+            return 1;
+        }
+        fileOutputClear.close();
 
-    for (int k = 0; k < matrixA.size(); k++) {
-        for (int i = 0; i < matrixA.size(); i++) {
-            for (int j = 0; j < matrixA.size(); j++) {
-                int tempPath = matrixA[i][k] + matrixA[k][j];
-                if (i == j) {
-                    matrixA[i][j] = 0;
-                } else if (i != j && tempPath > 0 && matrixA[i][j] > tempPath) {
-                    matrixA[i][j] = tempPath;
+        std::ofstream fileOutput("output.txt", std::ios::app);
+        if (!fileOutput.is_open()) {
+            std::cerr << "Error to open first OUTPUT file." << std::endl;
+            return 1;
+        }
+
+        for (Edge edge : edges) {
+            matrixA[edge.idVertexInto][edge.idVertexIn] = edge.length;
+            matrixB[edge.idVertexInto][edge.idVertexIn] = edge.idVertexIn;
+        }
+
+        writeMatrixAB(matrixA, matrixB, fileOutput);
+        std::cout << std::endl;
+
+        for (int k = 0; k < matrixA.size(); k++) {
+            for (int i = 0; i < matrixA.size(); i++) {
+                for (int j = 0; j < matrixA.size(); j++) {
+                    int tempPath = matrixA[i][k] + matrixA[k][j];
+                    if (i != j && tempPath > 0 && matrixA[i][j] > tempPath) {
+                        matrixA[i][j] = tempPath;
+                        matrixB[i][j] = k;
+                    }
                 }
             }
+            writeMatrixAB(matrixA, matrixB, fileOutput);
         }
-        writeMatrixA(matrixA, fileOutput);
+        fileOutput.close();
+
+        std::string isBroken;
+        std::cout << "Повторить ещё раз? [y/n]" << std::endl;
+        std::cin >> isBroken;
+        if (isBroken != "y" || !isBroken.empty()) {
+            break;
+        }
     }
 
-    fileOutput.close();
+
     return 0;
 }
