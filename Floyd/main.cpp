@@ -70,6 +70,18 @@ Vertex findVertexByName(const std::vector<Vertex>& vertexes, const std::string& 
     return lastVertex;
 }
 
+Vertex findVertexById(const std::vector<Vertex>& vertexes, const int needId) {
+    Vertex lastVertex;
+    for (const Vertex& vertex : vertexes) {
+        if (vertex.id == needId) {
+            lastVertex = vertex;
+            break;
+        }
+        lastVertex = vertex;
+    }
+    return lastVertex;
+}
+
 void edgesFill(const std::vector<Vertex>& vertexes, std::vector<Edge>& edges, std::ifstream& fileInputEdges) {
     std::string lineEdges;
     while (std::getline(fileInputEdges,lineEdges)) {
@@ -171,6 +183,27 @@ void writeMatrixAB(std::vector<std::vector<int>> matrixA, std::vector<std::vecto
     fileOutput << std::endl;
 }
 
+void findPathByMatrixB(
+        Vertex vertexStart,
+        Vertex vertexFinish,
+        std::vector<std::vector<int>>& matrixB,
+        const std::vector<Vertex>& vertexes,
+        std::ofstream& fileOutput
+        ) {
+    int vertexTmpId = matrixB[vertexStart.id][vertexFinish.id];
+    if (vertexTmpId == -1) {
+        std::cout << "Path not found" << std::endl;
+        return;
+    }
+
+    Vertex vertexTmp = findVertexById(vertexes, vertexTmpId);
+    std::cout << vertexTmp.name << " -> ";
+    if (vertexTmp.id == vertexFinish.id) {
+        return;
+    }
+    findPathByMatrixB(vertexTmp, vertexFinish, matrixB, vertexes, fileOutput);
+}
+
 int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
@@ -230,7 +263,7 @@ int main() {
 
         std::vector<std::vector<int>> matrixA(vertexes.size(), std::vector<int>(vertexes.size(), INT_MAX));
         initMatrixA(matrixA);
-        std::vector<std::vector<int>> matrixB(vertexes.size(), std::vector<int>(vertexes.size(), 0));
+        std::vector<std::vector<int>> matrixB(vertexes.size(), std::vector<int>(vertexes.size(), -1));
         initMatrixB(matrixB);
 
         std::ofstream fileOutputClear("output.txt", std::ios::trunc);
@@ -266,16 +299,18 @@ int main() {
             }
             writeMatrixAB(matrixA, matrixB, fileOutput);
         }
+
+        std::cout << vertexStart.name << " -> ";
+        findPathByMatrixB(vertexStart, vertexFinish, matrixB, vertexes, fileOutput);
+        std::cout << std::endl;
         fileOutput.close();
 
         std::string isBroken;
         std::cout << "Повторить ещё раз? [y/n]" << std::endl;
         std::cin >> isBroken;
-        if (isBroken != "y" || !isBroken.empty()) {
+        if (isBroken != "y") {
             break;
         }
     }
-
-
     return 0;
 }
