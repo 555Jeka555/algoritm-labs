@@ -173,8 +173,8 @@ void writeMatrixAB(std::vector<std::vector<int>> matrixA, std::vector<std::vecto
         fileOutput << "     ";
         std::cout << "     ";
         for (int j = 0; j < generalSize; j++) {
-            fileOutput << matrixB[i][j] << ' ';
-            std::cout << matrixB[i][j] << ' ';
+            fileOutput << matrixB[i][j] + 1 << ' ';
+            std::cout << matrixB[i][j] + 1 << ' ';
         }
         std::cout << std::endl;
         fileOutput << std::endl;
@@ -183,25 +183,26 @@ void writeMatrixAB(std::vector<std::vector<int>> matrixA, std::vector<std::vecto
     fileOutput << std::endl;
 }
 
-void findPathByMatrixB(
-        Vertex vertexStart,
-        Vertex vertexFinish,
+std::string findPathByMatrixB(
+        const Vertex& vertexStart,
+        const Vertex& vertexFinish,
         std::vector<std::vector<int>>& matrixB,
+        std::string path,
         const std::vector<Vertex>& vertexes,
         std::ofstream& fileOutput
         ) {
     int vertexTmpId = matrixB[vertexStart.id][vertexFinish.id];
     if (vertexTmpId == -1) {
-        std::cout << "Path not found" << std::endl;
-        return;
+        return "Path not found";
     }
 
     Vertex vertexTmp = findVertexById(vertexes, vertexTmpId);
-    std::cout << vertexTmp.name << " -> ";
+    path += vertexTmp.name;
     if (vertexTmp.id == vertexFinish.id) {
-        return;
+        return path;
     }
-    findPathByMatrixB(vertexTmp, vertexFinish, matrixB, vertexes, fileOutput);
+    path += " -> ";
+    return findPathByMatrixB(vertexTmp, vertexFinish, matrixB, path, vertexes, fileOutput);
 }
 
 int main() {
@@ -242,10 +243,49 @@ int main() {
     edgesFill(vertexes, edges, fileInputEdges);
     fileInputVertex.close();
 
+    std::vector<std::vector<int>> matrixA(vertexes.size(), std::vector<int>(vertexes.size(), INT_MAX));
+    initMatrixA(matrixA);
+    std::vector<std::vector<int>> matrixB(vertexes.size(), std::vector<int>(vertexes.size(), -1));
+    initMatrixB(matrixB);
+
+    std::ofstream fileOutputClear("output.txt", std::ios::trunc);
+    if (!fileOutputClear.is_open()) {
+        std::cerr << "Error to open first OUTPUT file." << std::endl;
+        return 1;
+    }
+    fileOutputClear.close();
+
+    std::ofstream fileOutput("output.txt", std::ios::app);
+    if (!fileOutput.is_open()) {
+        std::cerr << "Error to open first OUTPUT file." << std::endl;
+        return 1;
+    }
+
+    for (Edge edge : edges) {
+        matrixA[edge.idVertexInto][edge.idVertexIn] = edge.length;
+        matrixB[edge.idVertexInto][edge.idVertexIn] = edge.idVertexIn;
+    }
+
+    writeMatrixAB(matrixA, matrixB, fileOutput);
+    std::cout << std::endl;
+
+    for (int k = 0; k < matrixA.size(); k++) {
+        for (int i = 0; i < matrixA.size(); i++) {
+            for (int j = 0; j < matrixA.size(); j++) {
+                int tempPath = matrixA[i][k] + matrixA[k][j];
+                if (i != j && tempPath > 0 && matrixA[i][j] > tempPath) {
+                    matrixA[i][j] = tempPath;
+                    matrixB[i][j] = k;
+                }
+            }
+        }
+        writeMatrixAB(matrixA, matrixB, fileOutput);
+    }
+
     while (true) {
         Vertex vertexStart = *new Vertex;
         std::string startInput;
-        std::cout << "Введите номер вершин старта" << std::endl;
+        std::cout << "Enter vertex start" << std::endl;
         std::cin >> startInput;
         if (!isExistVertexByName(vertexes, startInput)) {
             continue;
@@ -254,63 +294,25 @@ int main() {
 
         Vertex vertexFinish = *new Vertex;
         std::string finishInput;
-        std::cout << "Введите номер вершин финиша" << std::endl;
+        std::cout << "Enter vertex finish" << std::endl;
         std::cin >> finishInput;
         if (!isExistVertexByName(vertexes, finishInput)) {
             continue;
         }
         vertexFinish = findVertexByName(vertexes, finishInput);
 
-        std::vector<std::vector<int>> matrixA(vertexes.size(), std::vector<int>(vertexes.size(), INT_MAX));
-        initMatrixA(matrixA);
-        std::vector<std::vector<int>> matrixB(vertexes.size(), std::vector<int>(vertexes.size(), -1));
-        initMatrixB(matrixB);
-
-        std::ofstream fileOutputClear("output.txt", std::ios::trunc);
-        if (!fileOutputClear.is_open()) {
-            std::cerr << "Error to open first OUTPUT file." << std::endl;
-            return 1;
-        }
-        fileOutputClear.close();
-
-        std::ofstream fileOutput("output.txt", std::ios::app);
-        if (!fileOutput.is_open()) {
-            std::cerr << "Error to open first OUTPUT file." << std::endl;
-            return 1;
-        }
-
-        for (Edge edge : edges) {
-            matrixA[edge.idVertexInto][edge.idVertexIn] = edge.length;
-            matrixB[edge.idVertexInto][edge.idVertexIn] = edge.idVertexIn;
-        }
-
-        writeMatrixAB(matrixA, matrixB, fileOutput);
-        std::cout << std::endl;
-
-        for (int k = 0; k < matrixA.size(); k++) {
-            for (int i = 0; i < matrixA.size(); i++) {
-                for (int j = 0; j < matrixA.size(); j++) {
-                    int tempPath = matrixA[i][k] + matrixA[k][j];
-                    if (i != j && tempPath > 0 && matrixA[i][j] > tempPath) {
-                        matrixA[i][j] = tempPath;
-                        matrixB[i][j] = k;
-                    }
-                }
-            }
-            writeMatrixAB(matrixA, matrixB, fileOutput);
-        }
-
-        std::cout << vertexStart.name << " -> ";
-        findPathByMatrixB(vertexStart, vertexFinish, matrixB, vertexes, fileOutput);
-        std::cout << std::endl;
+        std::string path =  vertexStart.name + " -> ";
+        path = findPathByMatrixB(vertexStart, vertexFinish, matrixB, path, vertexes, fileOutput);
+        std::cout << path << std::endl;
         fileOutput.close();
 
         std::string isBroken;
-        std::cout << "Повторить ещё раз? [y/n]" << std::endl;
+        std::cout << "Restart again? [y/n]" << std::endl;
         std::cin >> isBroken;
         if (isBroken != "y") {
             break;
         }
     }
+
     return 0;
 }
