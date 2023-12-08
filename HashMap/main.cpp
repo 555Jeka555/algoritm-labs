@@ -17,32 +17,62 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cmath>
 #include <windows.h>
 
 #define FILL_FACTOR 75
 
+bool isPrime(int n) {
+    if (n <= 1) {
+        return false;
+    }
+    for (int i = 2; i <= std::sqrt(n); i++) {
+        if (n % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int findN(int m) {
+    int x = 0;
+    int n = 0;
+    std::cout << m << std::endl;
+    while (true) {
+        x++;
+        n = 2 * m + x;
+        if (isPrime(n)) {
+            return n;
+        }
+    }
+}
+
 struct Item {
     std::string key = "";
     std::string value;
+    bool del = false;
 };
 
 struct Hashmap {
-    Item* elements;
-    int capacity = 32;
+    Item *elements;
+    int capacity = 0;
     int count = 0;
     std::vector<std::string> keys;
     std::string NOT_FOUND = "Not found";
-
+    std::string WAS_DEL = "Was deleted";
     long hash(std::string key) {
         long hash = 0;
         for (int i = 0; i < key.length(); ++i) {
-            hash += key[i] * (i + 1);
+            hash += key[i] + (i*1);
         }
         return hash % this->capacity;
     }
 
-    void initMemory() {
-        this->elements = (Item*)malloc(this->capacity * sizeof(Item));
+    void initMemory(int capacityM) {
+        capacityM = (capacityM + 1)*100;
+        this->capacity = findN(capacityM);
+        this->elements = new Item[this->capacity];
+        std::cout << "Capacity: " << this->capacity << std::endl;
     }
 
     void clearMemory() {
@@ -51,7 +81,7 @@ struct Hashmap {
 
     void removeKey(std::string keyRemove) {
         int index = 0;
-        for (std::string key : this->keys) {
+        for (std::string key: this->keys) {
             if (key == keyRemove) {
                 break;
             }
@@ -60,80 +90,104 @@ struct Hashmap {
         this->keys.erase(this->keys.begin() + index);
     }
 
-    void remove(const std::string& key) {
+    void remove(const std::string &key) {
         long hashed = hash(key);
         if (this->elements[hashed].key == key) {
-            this->elements[hashed].key = "";
-            this->elements[hashed].value = "";
+            this->elements[hashed].del = true;
             this->removeKey(key);
-            count -= 1;
+            count--;
             std::cout << "Record was deleted" << std::endl;
         } else {
-            for (int i = hashed; i < this->capacity - 1; ++i) {
-                if (i == hashed) {
-                    break;
-                }
-                if (this->elements[i].key == key) {
-                    this->elements[i].key = "";
-                    this->elements[i].value = "";
-                    this->removeKey(key);
-                    count -= 1;
-                    std::cout << "Record was deleted" << std::endl;
-                }
+            long temp = hashed;
+            int i = 1;
+            while (this->elements[temp].key != key) {
+                temp = (temp + i * i) % this->capacity;
+                i++;
             }
+            this->elements[hashed].del = true;
+            this->removeKey(key);
+            count--;
+            std::cout << "Record was deleted" << std::endl;
         }
     }
 
     void reallocMemory() {
         if (this->count / this->capacity * 100 >= FILL_FACTOR) {
-            this->elements = (Item*)std::realloc(NULL, this->capacity * 2 * sizeof(Item));
-            this->capacity *= 2;
+            this->capacity = findN(this->capacity);
+            this->elements = (Item *) std::realloc(NULL, this->capacity * sizeof(Item));
+            std::cout << "New capacity: " << this->capacity << std::endl;
         }
     }
 
-    void add(const std::string& key, const std::string& value) {
+    void add(const std::string &key, const std::string &value) {
         this->reallocMemory();
 
         long hashed = hash(key);
         if (this->elements[hashed].key == key) {
             this->elements[hashed].key = key;
             this->elements[hashed].value = value;
+            this->elements[hashed].del = false;
         } else if (this->elements[hashed].key != "") {
-            long temp = hashed + 1;
+            if (this->elements[hashed].del) {
+                this->elements[hashed].key = key;
+                this->elements[hashed].value = value;
+                this->elements[hashed].del = false;
+                this->count++;
+                this->keys.push_back(key);
+                return;
+            }
+            long temp = hashed;
+            int i = 1;
             while (this->elements[temp].key != "") {
-                temp++;
+                if (this->elements[temp].del) {
+                    this->elements[temp].key = key;
+                    this->elements[temp].value = value;
+                    this->elements[temp].del = false;
+                    this->count++;
+                    this->keys.push_back(key);
+                    return;
+                }
+                temp = (temp + i * i) % this->capacity;
+//                std::cout << "Temp hash-1 " << temp << " key: " << this->elements[temp].key << std::endl;
+                i++;
             }
             this->elements[temp].key = key;
             this->elements[temp].value = value;
-            this->keys.push_back(key);
+//            std::cout << "Temp hash-2 " << temp << " key: " << this->elements[temp].key << std::endl;
             this->count++;
+            this->keys.push_back(key);
         } else {
             this->elements[hashed].key = key;
             this->elements[hashed].value = value;
-            this->keys.push_back(key);
             this->count++;
+            this->keys.push_back(key);
         }
     }
 
-    std::string get(const std::string& key) {
+    std::string get(const std::string &key) {
         long hashed = hash(key);
+        if (this->elements[hashed].del) {
+            return this->WAS_DEL;
+        }
+
         if (this->elements[hashed].key == key) {
             return this->elements[hashed].value;
         } else {
-            for (int i = hashed; i < this->capacity - 1; ++i) {
-                if (i == hashed) {
-                    break;
+            long temp = hashed;
+            int i = 1;
+            while (this->elements[temp].key != key) {
+                if (this->elements[temp].key == "") {
+                    return this->NOT_FOUND;
                 }
-                if (this->elements[i].key == key) {
-                    return this->elements[i].value;
-                }
+                temp = (temp + i * i) % this->capacity;
+                i++;
             }
-            return this->NOT_FOUND;
+            return this->elements[temp].value;
         }
     }
 };
 
-std::vector<std::string> split(const std::string& string) {
+std::vector<std::string> split(const std::string &string) {
     std::vector<std::string> words;
     std::string::size_type beg = 0;
     std::string::size_type end = 0;
@@ -158,7 +212,7 @@ void updatedOutputFile(std::string fileOutputName, Hashmap hashmap) {
         std::cerr << "Error to open first OUTPUT file." << std::endl;
     }
 
-    for (std::string key : hashmap.keys) {
+    for (std::string key: hashmap.keys) {
         fileOutput << hashmap.get(key) << " " << key << std::endl;
     }
 
@@ -170,37 +224,20 @@ int main() {
     SetConsoleOutputCP(1251);
 
     std::string fileInputName;
-    std::cout << "Enter name second INPUT file: " << std::endl;
+    std::cout << "Enter name INPUT file: " << std::endl;
     std::cin >> fileInputName;
-    std::ifstream fileInput(fileInputName);
-    if (!fileInput.is_open()) {
-        std::cerr << "Error to open second INPUT file." << std::endl;
-        return 1;
-    }
 
     Hashmap hashmap;
-    hashmap.initMemory();
-    std::string lineRecord;
-    while (std::getline(fileInput, lineRecord)) {
-        std::vector<std::string> lineSpilt = split(lineRecord);
-
-        std::string name = lineSpilt[0];
-        std::string phone = lineSpilt[1];
-
-        hashmap.add(phone, name);
-    }
-    fileInput.close();
-
-    std::cout << "Dict record complete!" << std::endl;
     while (true) {
         std::cout << std::endl;
         std::cout << "Your action numbers:" << std::endl;
-        std::cout << "1 - add element" << std::endl;
-        std::cout << "2 - remove element by phone" << std::endl;
+        std::cout << "1 - new dict" << std::endl;
+        std::cout << "2 - get all elements" << std::endl;
         std::cout << "3 - get element" << std::endl;
-        std::cout << "4 - get all elements" << std::endl;
-        std::cout << "5 - exit" << std::endl;
-
+        std::cout << "4 - add element" << std::endl;
+        std::cout << "5 - remove element by phone" << std::endl;
+        std::cout << "6 - save dict in file" << std::endl;
+        std::cout << "7 - exit" << std::endl;
 
         bool isBreak = false;
         std::string enterAction;
@@ -209,30 +246,58 @@ int main() {
         std::vector<std::string> lineSpilt;
         std::string name;
         std::string phone;
+        std::string lineRecord;
+        std::ifstream fileInput(fileInputName);
+        int lineCount = 0;
+        std::string line;
 
         switch (action[0]) {
             case '1':
-                std::cout << "Enter <name>" << std::endl;
-                std::cin >> name;
+                if (!fileInput.is_open()) {
+                    std::cerr << "Error to open INPUT file for count lines." << std::endl;
+                    return 1;
+                }
 
-                std::cout << "Enter <phone>" << std::endl;
-                std::cin >> phone;
+                fileInput.clear();
+                fileInput.seekg(0, std::ios::beg);
 
-                hashmap.add(phone, name);
-                updatedOutputFile(fileInputName, hashmap);
+                while (getline(fileInput, line)) {
+                    lineCount++;
+                }
+
+                fileInput.clear();
+                fileInput.seekg(0, std::ios::beg);
+
+                hashmap.initMemory(lineCount);
+                while (std::getline(fileInput, lineRecord)) {
+                    lineSpilt = split(lineRecord);
+
+                    name = lineSpilt[0];
+                    phone = lineSpilt[1];
+
+                    hashmap.add(phone, name);
+                }
+                fileInput.close();
+
+                std::cout << "Dict record complete!" << std::endl;
                 break;
             case '2':
-                std::cout << "Enter <phone> for remove" << std::endl;
-                std::cin >> enterAction;
+                if (hashmap.capacity == 0) {
+                    std::cout << "Create new dict!" << std::endl;
+                    break;
+                }
 
-                lineSpilt = split(enterAction);
-
-                phone = lineSpilt[0];
-
-                hashmap.remove(phone);
-                updatedOutputFile(fileInputName, hashmap);
+                std::cout << "key" << " " << "name" << " " << "hash" << std::endl;
+                for (std::string key: hashmap.keys) {
+                    std::cout << key << " " << hashmap.get(key) << " " << hashmap.hash(key) << std::endl;
+                }
                 break;
             case '3':
+                if (hashmap.capacity == 0) {
+                    std::cout << "Create new dict!" << std::endl;
+                    break;
+                }
+
                 std::cout << "Enter <phone> for get" << std::endl;
                 std::cin >> enterAction;
 
@@ -242,12 +307,44 @@ int main() {
                 std::cout << hashmap.get(phone) << std::endl;
                 break;
             case '4':
-                std::cout << "key" << " " << "name" << " " << "hash" << std::endl;
-                for (std::string key : hashmap.keys) {
-                    std::cout << key << " " << hashmap.get(key) << " " << hashmap.hash(key) << std::endl;
+                if (hashmap.capacity == 0) {
+                    std::cout << "Create new dict!" << std::endl;
+                    break;
                 }
+
+                std::cout << "Enter <name>" << std::endl;
+                std::cin >> name;
+
+                std::cout << "Enter <phone>" << std::endl;
+                std::cin >> phone;
+
+                hashmap.add(phone, name);
                 break;
             case '5':
+                if (hashmap.capacity == 0) {
+                    std::cout << "Create new dict!" << std::endl;
+                    break;
+                }
+
+                std::cout << "Enter <phone> for remove" << std::endl;
+                std::cin >> enterAction;
+
+                lineSpilt = split(enterAction);
+
+                phone = lineSpilt[0];
+
+                hashmap.remove(phone);
+                break;
+            case '6':
+                if (hashmap.capacity == 0) {
+                    std::cout << "Create new dict!" << std::endl;
+                    break;
+                }
+
+                updatedOutputFile(fileInputName, hashmap);
+                std::cout << "Dict saved!" << std::endl;
+                break;
+            case '7':
                 isBreak = true;
                 break;
         }
