@@ -10,9 +10,6 @@
  * Требуется построить и выдать в наглядном виде бинарное дерево,
  * представляющее данное выражение (12).
  *
- * Используемые ресурсы:
- *
- *
  * Среда разработки:  CLion 2023.2.1
  * Версия C++: C++17
  *
@@ -22,102 +19,183 @@
 #include <string>
 #include <regex>
 #include <fstream>
+#include <stack>
 
 struct Tree {
     char data;
-    Tree *left = nullptr;
-    Tree *right = nullptr;
+    Tree *left;
+    Tree *right;
     int level;
+
+    Tree(char _data, int _level, Tree *_left, Tree *_right): data(_data), level(_level), left(_left), right(_right) {}
 };
 
-bool findCharInString(const std::string& str, char searchChar) {
-    for (char i : str) {
-        if (i == searchChar) {
-            return true;
+std::string removeSpaces(std::string expression) {
+    std::string tempExpression;
+    for (char i: expression) {
+        if (i == ' ') {
+            continue;
         }
+        tempExpression += i;
     }
-    return false;
+    return tempExpression;
 }
 
-Tree* createNode(char ch, int level) {
-    Tree* newNode = new Tree();
-    newNode->data = ch;
-    newNode->level = level;
-    return newNode;
-}
-
-Tree* buildTree(std::string expression, int start, int end, int level) {
-    if (start > end) {
-        return nullptr;
-    }
-
-    int count = 0;
-    int index = -1;
-    for (int i = start; i <= end; i++) {
-        if (expression[i] == '(') {
-            count++;
-        } else if (expression[i] == ')') {
-            count--;
-        } else if (count == 0 && (expression[i] == '+' || expression[i] == '-' || expression[i] == '^')) {
-            index = i;
+std::string removeBrackets(const std::string &expression) {
+    std::string result = expression;
+    while (result.front() == '(' && result.back() == ')') {
+        int count = 0;
+        bool found = false;
+        for (int i = 0; i < result.size() - 1; i++) {
+            if (result[i] == '(') {
+                count++;
+            } else if (result[i] == ')') {
+                count--;
+            }
+            if (count == 0 && i < result.size() - 2) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            result = result.substr(1, result.size() - 2);
+        } else {
             break;
         }
     }
+    return result;
+}
 
-    if (index == -1) {
-        if (expression[start] == '(' and expression[end] == ')') {
-            return buildTree(expression, start + 1, end - 1, level + 1);
-        } else {
-            return createNode(expression[start], level);
+bool isOper(char ch) {
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^');
+}
+
+int findMinOperFromPlusAndMinus(const std::string& expression, int start, int end) {
+    int count = 0;
+    for (int i = end; i >= start; i--) {
+        if (expression[i] == ')') {
+            count++;
+        } else if (expression[i] == '(') {
+            count--;
+        } else if (count == 0 && isOper(expression[i])) {
+            if (expression[i] == '+' || expression[i] == '-') {
+                return i;
+            }
         }
     }
-
-    auto newNode = createNode(expression[index], level);
-    newNode->left = buildTree(expression, start, index - 1, level + 1);
-    newNode->right = buildTree(expression, index + 1, end, level + 1);
-
-    return newNode;
+    return -1;
 }
 
-void printTree(Tree* tree, int rootLevel, std::ofstream& fileOutput) {
+int findMinOperFromMultAndSub(const std::string& expression, int start, int end) {
+    int count = 0;
+    for (int i = end; i >= start; i--) {
+        if (expression[i] == ')') {
+            count++;
+        } else if (expression[i] == '(') {
+            count--;
+        } else if (count == 0 && isOper(expression[i])) {
+            if (expression[i] == '*' || expression[i] == '/') {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+int findMinOperExpon(const std::string& expression, int start, int end) {
+    int count = 0;
+    for (int i = start; i <= end; i++) {
+        if (expression[i] == ')') {
+            count++;
+        } else if (expression[i] == '(') {
+            count--;
+        } else if (count == 0 && isOper(expression[i])) {
+            if (expression[i] == '^') {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+void findMinUnarMinus(std::string& expression, int start) {
+    if (expression[start] == '-'){
+        expression[start] = '~';
+    }
+}
+
+int findMinOper(std::string& expression, int start, int end) {
+    findMinUnarMinus(expression, start);
+
+    int isMinOperFromPlusAndMinus = findMinOperFromPlusAndMinus(expression, start, end);
+    if (isMinOperFromPlusAndMinus != -1) {
+        return isMinOperFromPlusAndMinus;
+    }
+
+    int isMinOperFromMultAndSub = findMinOperFromMultAndSub(expression, start, end);
+    if (isMinOperFromMultAndSub != -1) {
+        return isMinOperFromMultAndSub;
+    }
+
+    int isMinOperExpon = findMinOperExpon(expression, start, end);
+    if (isMinOperExpon != -1) {
+        return isMinOperExpon;
+    }
+
+    return -1;
+}
+
+Tree *buildTree(std::string &expression, int start, int end, int level) {
+    int minOper = findMinOper(expression, start, end);
+
+//    std::cout << expression << " " << expression[start] << std::endl;
+    if (minOper != -1) {
+        Tree *left = buildTree(expression, start, minOper - 1, level + 1);
+        Tree *right = buildTree(expression, minOper + 1, end, level + 1);
+        return new Tree(expression[minOper], level, left, right);
+    } else if (expression[start] == '(' && expression[end] == ')') {
+        return buildTree(expression, start + 1, end - 1, level);
+    } else {
+        if (expression[start] == '~') {
+            Tree *left;
+
+            if (expression[start + 1] == '(') {
+                left = buildTree(expression, start + 1, end, level + 1);
+            } else {
+                left = new Tree(expression[start + 1], level + 1, nullptr, nullptr);
+            }
+            return new Tree(expression[start], level, left, nullptr);
+        }
+
+        return new Tree(expression[start], level, nullptr, nullptr);
+    }
+}
+
+void printTree(Tree *tree, std::ofstream &fileOutput) {
     if (tree == nullptr) {
         return;
     }
-    for (int i = 0; i < tree->level; i++) {
-        std::cout << ".";
-        fileOutput << ".";
-    }
-    std::cout << tree->data << std::endl;
-    fileOutput << tree->data << std::endl;
-    printTree(tree->left, rootLevel + 1, fileOutput);
-    printTree(tree->right, rootLevel + 1, fileOutput);
-}
 
-void printTree2(Tree* tree, std::ofstream& fileOutput) {
-    if (tree == nullptr) {
-        return;
-    }
-
-    printTree2(tree->left, fileOutput);
+    printTree(tree->left, fileOutput);
     for (int i = 0; i < tree->level; i++) {
         std::cout << "    ";
         fileOutput << "    ";
     }
+
     std::cout << tree->data << std::endl;
     fileOutput << tree->data << std::endl;
-    printTree2(tree->right, fileOutput);
+    printTree(tree->right, fileOutput);
 }
 
-std::string formatString(std::string input, std::string patternRegax, std::string replacementRegax) {
-    std::regex pattern(patternRegax);
-    std::string replacement(replacementRegax);
-    std::string result = std::regex_replace(input, pattern, replacement);
-    for (int i = 0; i < result.size(); i++) {
-        if (::isspace(result[i])) {
-            result.erase(i--, 1);
-        }
-    }
-    return result;
+
+void version2(std::string expression, std::ofstream &fileOutput) {
+    std::cout << "Your expression: " << expression << std::endl;
+    expression = removeSpaces(expression);
+    expression = removeBrackets(expression);
+    std::cout << "Your format expression: " << expression << std::endl;
+    int expressionSize = expression.size();
+    Tree *tree = buildTree(expression, 0,  expressionSize- 1, 0);
+    printTree(tree, fileOutput);
 }
 
 int main() {
@@ -132,14 +210,14 @@ int main() {
 
     std::ofstream fileOutputClear("output.txt", std::ios::trunc);
     if (!fileOutputClear.is_open()) {
-        std::cerr << "Ошибка при открытиии файла OUTPUT." << std::endl;
+        std::cerr << "Error to open OUTPUT file." << std::endl;
         return 1;
     }
     fileOutputClear.close();
 
     std::ofstream fileOutput("output.txt", std::ios::app);
     if (!fileOutput.is_open()) {
-        std::cerr << "Ошибка при открытиии файла OUTPUT." << std::endl;
+        std::cerr << "Error to open OUTPUT file." << std::endl;
         return 1;
     }
 
@@ -148,18 +226,8 @@ int main() {
     while (fileInput.get(ch)) {
         expression += ch;
     }
-
-    expression = formatString(expression, "\\((\\w+\\s*\\+\\s*\\w+)\\)\\s*\\^\\s*(\\w+)", "(($1) ^ $2)");
-    expression = formatString(expression, "(\\w+\\s*\\^\\s*\\(\\w+\\s*\\+\\s*\\w+\\))", "($1)");
-    expression = formatString(expression, "([a-zA-Z0-9]+)\\s*\\^\\s*([a-zA-Z0-9]+)", "($1 ^ $2)");
-
-//    std::cout << expression << std::endl;
-
-    auto tree = buildTree(expression, 0, expression.length() - 1, 0);
-    printTree(tree, 0, fileOutput);
-    std::cout << std::endl;
-    fileOutput << std::endl;
-    printTree2(tree, fileOutput);
+    
+    version2(expression, fileOutput);
 
     return 0;
 }
