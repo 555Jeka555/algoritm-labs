@@ -1,0 +1,3 @@
+C:/Volgatech/2course/Algoritms/algoritm-labs/Proba/cmake-build-debug/CMakeFiles/Proba.dir
+C:/Volgatech/2course/Algoritms/algoritm-labs/Proba/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Volgatech/2course/Algoritms/algoritm-labs/Proba/cmake-build-debug/CMakeFiles/rebuild_cache.dir
