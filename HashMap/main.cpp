@@ -60,16 +60,13 @@ struct Hashmap {
     std::vector<std::string> keys;
     std::string NOT_FOUND = "Not found";
     std::string WAS_DEL = "Was deleted";
+
     long hash(std::string key) {
-        long hash = 0;
-        for (int i = 0; i < key.length(); ++i) {
-            hash += key[i] + (i*1);
-        }
-        return hash % this->capacity;
+        return stoi(key) % this->capacity;
     }
 
     void initMemory(int capacityM) {
-        capacityM = (capacityM + 1)*100;
+//        capacityM = (capacityM + 1)*100;
         this->capacity = findN(capacityM);
         this->elements = new Item[this->capacity];
         std::cout << "Capacity: " << this->capacity << std::endl;
@@ -101,10 +98,10 @@ struct Hashmap {
             long temp = hashed;
             int i = 1;
             while (this->elements[temp].key != key) {
-                temp = (temp + i * i) % this->capacity;
+                temp = (hashed + i*i) % this->capacity;
                 i++;
             }
-            this->elements[hashed].del = true;
+            this->elements[temp].del = true;
             this->removeKey(key);
             count--;
             std::cout << "Record was deleted" << std::endl;
@@ -147,7 +144,7 @@ struct Hashmap {
                     this->keys.push_back(key);
                     return;
                 }
-                temp = (temp + i * i) % this->capacity;
+                temp = (hashed + i*i) % this->capacity;
 //                std::cout << "Temp hash-1 " << temp << " key: " << this->elements[temp].key << std::endl;
                 i++;
             }
@@ -179,10 +176,32 @@ struct Hashmap {
                 if (this->elements[temp].key == "") {
                     return this->NOT_FOUND;
                 }
-                temp = (temp + i * i) % this->capacity;
+                temp = (hashed + i*i) % this->capacity;
                 i++;
             }
             return this->elements[temp].value;
+        }
+    }
+
+    int getHash(const std::string &key) {
+        long hashed = hash(key);
+        if (this->elements[hashed].del) {
+            return -1;
+        }
+
+        if (this->elements[hashed].key == key) {
+            return hashed;
+        } else {
+            long temp = hashed;
+            int i = 1;
+            while (this->elements[temp].key != key) {
+                if (this->elements[temp].key == "") {
+                    return -1;
+                }
+                temp = (hashed + i*i) % this->capacity;
+                i++;
+            }
+            return temp;
         }
     }
 };
@@ -287,9 +306,9 @@ int main() {
                     break;
                 }
 
-                std::cout << "key" << " " << "name" << " " << "hash" << std::endl;
+                std::cout << "key name initHash init" << std::endl;
                 for (std::string key: hashmap.keys) {
-                    std::cout << key << " " << hashmap.get(key) << " " << hashmap.hash(key) << std::endl;
+                    std::cout << key << " " << hashmap.get(key) << " " << hashmap.hash(key) << " " << hashmap.getHash(key) << std::endl;
                 }
                 break;
             case '3':
