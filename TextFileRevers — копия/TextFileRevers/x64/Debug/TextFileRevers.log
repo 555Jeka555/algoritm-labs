@@ -1,0 +1,4 @@
+﻿  TextFileRevers.cpp
+C:\Volgatech\2course\Algoritms\algoritm-labs\TextFileRevers\TextFileRevers\TextFileRevers.cpp(76,20): warning C4066: знаки после первого в константе из двухбайтовых знаков пропускаются
+C:\Volgatech\2course\Algoritms\algoritm-labs\TextFileRevers\TextFileRevers\TextFileRevers.cpp(76,37): warning C4066: знаки после первого в константе из двухбайтовых знаков пропускаются
+  TextFileRevers.vcxproj -> C:\Volgatech\2course\Algoritms\algoritm-labs\TextFileRevers\x64\Debug\TextFileRevers.exe
