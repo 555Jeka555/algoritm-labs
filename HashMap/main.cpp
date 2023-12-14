@@ -18,9 +18,12 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <io.h>
 #include <windows.h>
 
 #define FILL_FACTOR 75
+
+const int MAXN = 20;
 
 bool isPrime(int n) {
     if (n <= 1) {
@@ -183,7 +186,7 @@ struct Hashmap {
         }
     }
 
-    int getHash(const std::string &key) {
+    long getHash(const std::string &key) {
         long hashed = hash(key);
         if (this->elements[hashed].del) {
             return -1;
@@ -238,6 +241,15 @@ void updatedOutputFile(std::string fileOutputName, Hashmap hashmap) {
     fileOutput.close();
 }
 
+void buildBufString(char *buf, std::string str) {
+    for (int i = 0; i < MAXN; i++)
+        buf[i] = str[i];
+
+    for (int i = str.size(); i < MAXN; i++)
+        buf[i] = ' ';
+    buf[str.size()] = '\0';
+}
+
 int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
@@ -247,6 +259,7 @@ int main() {
     std::cin >> fileInputName;
 
     Hashmap hashmap;
+    const char noname[MAXN] = "Unknown";
     while (true) {
         std::cout << std::endl;
         std::cout << "Your action numbers:" << std::endl;
@@ -268,7 +281,12 @@ int main() {
         std::string lineRecord;
         std::ifstream fileInput(fileInputName);
         int lineCount = 0;
+        char buf[MAXN];
         std::string line;
+        FILE *spr;
+        long hashed;
+
+        std::fstream binFile("Sprav", std::ios::in | std::ios::out | std::ios::binary);
 
         switch (action[0]) {
             case '1':
@@ -288,6 +306,16 @@ int main() {
                 fileInput.seekg(0, std::ios::beg);
 
                 hashmap.initMemory(lineCount);
+
+                spr = fopen("Sprav","w");
+                fprintf(spr,"bbb");
+                fclose(spr);
+
+                for (int i = 0; i <= hashmap.capacity; i++) {
+                    binFile.seekp((sizeof noname)*i, std::ios::beg);
+                    binFile.write(noname,sizeof noname);
+                }
+
                 while (std::getline(fileInput, lineRecord)) {
                     lineSpilt = split(lineRecord);
 
@@ -295,6 +323,10 @@ int main() {
                     phone = lineSpilt[1];
 
                     hashmap.add(phone, name);
+
+                    buildBufString(buf, name);
+                    binFile.seekp((sizeof buf)*hashmap.getHash(phone), std::ios::beg);
+                    binFile.write(buf,sizeof buf);
                 }
                 fileInput.close();
 
@@ -323,7 +355,16 @@ int main() {
                 lineSpilt = split(enterAction);
                 phone = lineSpilt[0];
 
-                std::cout << hashmap.get(phone) << std::endl;
+                hashed = hashmap.getHash(phone);
+                if (hashed != -1) {
+                    binFile.seekg((sizeof buf)*hashed, std::ios::beg);
+                    binFile.read(buf, sizeof buf);
+                    std::cout << buf << std::endl;
+                } else {
+                    std::cout << "Not Found" << std::endl;
+                }
+
+//                std::cout << hashmap.get(phone) << std::endl;
                 break;
             case '4':
                 if (hashmap.capacity == 0) {
@@ -338,6 +379,10 @@ int main() {
                 std::cin >> phone;
 
                 hashmap.add(phone, name);
+
+                buildBufString(buf, name);
+                binFile.seekp((sizeof buf)*hashmap.getHash(phone), std::ios::beg);
+                binFile.write(buf,sizeof buf);
                 break;
             case '5':
                 if (hashmap.capacity == 0) {
@@ -349,10 +394,18 @@ int main() {
                 std::cin >> enterAction;
 
                 lineSpilt = split(enterAction);
-
                 phone = lineSpilt[0];
-
                 hashmap.remove(phone);
+
+                hashed = hashmap.getHash(phone);
+                if (hashed != -1) {
+                    buildBufString(buf, "Unkown");
+                    binFile.seekp((sizeof buf)*hashmap.getHash(phone), std::ios::beg);
+                    binFile.write(buf,sizeof buf);
+                } else {
+                    std::cout << "Not Found" << std::endl;
+                }
+
                 break;
             case '6':
                 if (hashmap.capacity == 0) {
