@@ -361,7 +361,7 @@ int main() {
                     binFile.read(buf, sizeof buf);
                     std::cout << buf << std::endl;
                 } else {
-                    std::cout << "Not Found" << std::endl;
+                    std::cout << "Unkown" << std::endl;
                 }
 
 //                std::cout << hashmap.get(phone) << std::endl;
@@ -403,7 +403,7 @@ int main() {
                     binFile.seekp((sizeof buf)*hashmap.getHash(phone), std::ios::beg);
                     binFile.write(buf,sizeof buf);
                 } else {
-                    std::cout << "Not Found" << std::endl;
+                    std::cout << "Unkown" << std::endl;
                 }
 
                 break;
