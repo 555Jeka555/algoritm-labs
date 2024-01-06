@@ -16,9 +16,9 @@ void updatedOutputFile(std::string fileOutputName, std::vector<std::string> expr
     }
 
     int deep = std::min(express.size(), hashed.size());
-    fileOutput << "Hash                                                             Express" << std::endl;
+    fileOutput << "Hash                                                                Express" << std::endl;
     for (int i = 0; i < deep; i++) {
-        fileOutput << hashed[i] << " " << express[i] << std::endl;
+        fileOutput << hashed[i] << "    " << express[i] << std::endl;
     }
 
     fileOutput.close();
