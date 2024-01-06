@@ -22,5 +22,4 @@ private:
     static uint32_t ROTR(uint32_t x, uint8_t n);
 };
 
-
 #endif //SHA256_SHA256_H

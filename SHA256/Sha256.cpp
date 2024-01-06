@@ -1,16 +1,14 @@
 #include "Sha256.h"
-
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <vector>
 
-
 std::string Sha256::hash(const std::string &input)
 {
     std::vector<uint32_t> h = {
             0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-            0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+            0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
     };
 
     std::string paddedInput = preprocess(input);
@@ -59,7 +57,7 @@ void Sha256::processBlock(const std::string& block, std::vector<uint32_t>& h)
             0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624,
             0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a,
             0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb,
-            0xbef9a3f7, 0xc67178f2
+            0xbef9a3f7, 0xc67178f2,
     };
 
     std::vector<uint32_t> w(64, 0);
@@ -134,8 +132,3 @@ uint32_t Sha256::ROTR(uint32_t x, uint8_t n)
 {
     return (x >> n) | (x << (32 - n));
 }
-
-
-
-
-
