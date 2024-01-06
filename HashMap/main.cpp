@@ -62,7 +62,7 @@ struct Hashmap {
     int count = 0;
     std::vector<std::string> keys;
     std::string NOT_FOUND = "Not found";
-    std::string WAS_DEL = "Was deleted";
+    std::string WAS_DEL = "was deleted";
 
     long hash(std::string key) {
         return stoi(key) % this->capacity;
@@ -94,7 +94,7 @@ struct Hashmap {
         long hashed = hash(key);
         if (this->elements[hashed].key == key) {
             this->elements[hashed].del = true;
-            this->removeKey(key);
+//            this->removeKey(key);
             count--;
             std::cout << "Record was deleted" << std::endl;
         } else {
@@ -105,7 +105,7 @@ struct Hashmap {
                 i++;
             }
             this->elements[temp].del = true;
-            this->removeKey(key);
+//            this->removeKey(key);
             count--;
             std::cout << "Record was deleted" << std::endl;
         }
@@ -133,6 +133,7 @@ struct Hashmap {
                 this->elements[hashed].value = value;
                 this->elements[hashed].del = false;
                 this->count++;
+
                 this->keys.push_back(key);
                 return;
             }
@@ -166,8 +167,8 @@ struct Hashmap {
 
     std::string get(const std::string &key) {
         long hashed = hash(key);
-        if (this->elements[hashed].del) {
-            return this->WAS_DEL;
+        if (this->elements[hashed].del && this->elements[hashed].key == key) {
+            return this->elements[hashed].value + " " + this->WAS_DEL;
         }
 
         if (this->elements[hashed].key == key) {
@@ -182,15 +183,20 @@ struct Hashmap {
                 temp = (hashed + i*i) % this->capacity;
                 i++;
             }
+
+            if (this->elements[temp].del && this->elements[temp].key == key) {
+                return this->elements[temp].value + " " + this->WAS_DEL;
+            }
+
             return this->elements[temp].value;
         }
     }
 
     long getHash(const std::string &key) {
         long hashed = hash(key);
-        if (this->elements[hashed].del) {
-            return -1;
-        }
+//        if (this->elements[hashed].del) {
+//            return -1;
+//        }
 
         if (this->elements[hashed].key == key) {
             return hashed;
@@ -338,7 +344,7 @@ int main() {
                     break;
                 }
 
-                std::cout << "key name initHash init" << std::endl;
+                std::cout << "key name initHash hash" << std::endl;
                 for (std::string key: hashmap.keys) {
                     std::cout << key << " " << hashmap.get(key) << " " << hashmap.hash(key) << " " << hashmap.getHash(key) << std::endl;
                 }
